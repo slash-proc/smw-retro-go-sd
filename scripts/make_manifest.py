@@ -252,6 +252,9 @@ def build_manifest(*, bin_path: Path, wasm_path: Path, tag: str, repo: str, comm
         "schemaVersion": SCHEMA_VERSION,
         "project": project,
         "title": title,
+        # Where a human reads about this project. Derived from the repo rather
+        # than written down, so it cannot name a repository this is not.
+        "docs": f"https://github.com/{repo}#readme",
         "source": {"repo": repo, "commit": commit, "ref": tag},
         "tools": [build_tool(wasm_path)],
         "targets": [
