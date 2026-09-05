@@ -65,7 +65,7 @@ BUILD_DIR ?= build/$(PROJECT_KIND)
 PACKED_BIN := Super Mario World.bin
 HB_NAME    := Super Mario World
 COVER_JPG  := $(BUILD_DIR)/cover.jpg
-COVER_SRC  := src/assets/cover_src.png
+COVER_SRC  := src/assets/cover_src.jpg
 
 include $(GNW_CORE_SDK)/Makefile
 
@@ -114,6 +114,9 @@ pack: $(TARGET_BIN) $(COVER_JPG)
 
 all: pack
 
+# The linker map, named by the same rule that writes it (sdk/Makefile -Wl,-Map).
+TARGET_MAP := $(BUILD_DIR)/$(CORE_NAME)_core.map
+
 .PHONY: print-PROJECT_KIND print-PACKED_BIN print-CORE_NAME print-DOCKER_IMAGE \
 	print-TARGET_ELF print-TARGET_MAP print-CORE_VERSION
 print-PROJECT_KIND:
@@ -127,7 +130,7 @@ print-DOCKER_IMAGE:
 print-TARGET_ELF:
 	@echo $(TARGET_ELF)
 print-TARGET_MAP:
-	@echo $(BUILD_DIR)/$(CORE_NAME)_core.map
+	@echo $(TARGET_MAP)
 print-CORE_VERSION:
 	@echo $(CORE_VERSION)
 
