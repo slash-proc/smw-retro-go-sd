@@ -117,12 +117,17 @@ all: pack
 # The linker map, named by the same rule that writes it (sdk/Makefile -Wl,-Map).
 TARGET_MAP := $(BUILD_DIR)/$(CORE_NAME)_core.map
 
-.PHONY: print-PROJECT_KIND print-PACKED_BIN print-CORE_NAME print-DOCKER_IMAGE \
+.PHONY: print-PROJECT_KIND print-PACKED_BIN print-RO_BIN print-CORE_NAME print-DOCKER_IMAGE \
 	print-TARGET_ELF print-TARGET_MAP print-CORE_VERSION
 print-PROJECT_KIND:
 	@echo $(PROJECT_KIND)
 print-PACKED_BIN:
 	@echo $(PACKED_BIN)
+# Empty here: only a project that installs a second device file beside
+# its binary sets RO_BIN. The shared stage_release.py reads it for every
+# project so the script itself needs no per-project variant.
+print-RO_BIN:
+	@echo $(RO_BIN)
 print-CORE_NAME:
 	@echo $(CORE_NAME)
 print-DOCKER_IMAGE:
