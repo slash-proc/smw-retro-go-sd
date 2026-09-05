@@ -12,6 +12,8 @@
 
 import { verify } from "./verify.mjs";
 
+// Bit 0 is retired: it meant "skip the ROM hash check", which is the host's
+// decision now and is made before a run rather than passed into one.
 export const FLAG_NO_INCLUDE_ROM = 1 << 1;
 
 export const ABI_VERSION = 1;
