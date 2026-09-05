@@ -27,21 +27,15 @@ const page = await browser.newPage();
 
 // Anything the page logs as an error is a failure, even if the flow survives:
 // a page that works by accident is one refactor from not working.
+//
+// There are no tolerated failures any more. The page reads the manifest from
+// the dist tree deployed in the same artifact, so every request it makes is
+// same-origin and is a file this build produced. A failed fetch means a broken
+// deploy, which is exactly what this test should catch.
 const problems = [];
 page.on("pageerror", (e) => problems.push(`pageerror: ${e.message}`));
-// A cross-origin 404 is expected and is not a page bug: the page asks the dist
-// branch for a published manifest first, and that branch does not exist until
-// the project has been tagged. The browser logs the failed request as a console
-// error regardless, and the page then falls back to the module deployed beside
-// it -- which is the behaviour test-page-stale.mjs covers. Same-origin failures
-// stay fatal, because those are files this build should have produced.
-const pageOrigin = new URL(url).origin;
 page.on("console", (m) => {
-  if (m.type() !== "error") return;
-  const from = m.location()?.url ?? "";
-  const expected = /Failed to load resource/.test(m.text())
-    && from && !from.startsWith(pageOrigin);
-  if (!expected) problems.push(`console: ${m.text()}`);
+  if (m.type() === "error") problems.push(`console: ${m.text()}`);
 });
 
 await page.goto(url, { waitUntil: "networkidle" });

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Records the hashes of a verified extraction into reference.json, which
-// manifest.mjs publishes so consumers can state what a correct run produces.
+// build-page.sh publishes beside the page, so a user can be told whether the
+// extraction they just ran matches a run this project verified.
 //
 // Run only by check.sh, immediately after a run has been confirmed
 // byte-identical to the Python reference. Generating it any other way would

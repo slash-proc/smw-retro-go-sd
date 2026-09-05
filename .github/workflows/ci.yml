@@ -300,6 +300,28 @@ jobs:
             --retain 5 \
             --require-tag "${GITHUB_REF_NAME}"
 
+      # The manual conversion page, at the site root. The spec leaves the root
+      # free for exactly this, and the page reads the manifest build_dist.py
+      # just mirrored -- the same file, fetched the same way, as any
+      # third-party installer. That is what makes this page a test of the
+      # distribution model and not merely a nicety beside it.
+      - name: Build the conversion page
+        run: |
+          set -euo pipefail
+          cd tools/extractor
+          MANIFEST_URL="dist/${GITHUB_REF_NAME}/manifest.json" ./build-page.sh
+          cp -r site/. "${GITHUB_WORKSPACE}/_site/"
+
+      # The page and the dist tree are built by different scripts and only meet
+      # here, so this is the first moment anything can tell whether they agree.
+      # It walks the page's own load path: config.json, the manifest it names,
+      # the module beside it, hashes, verifier.
+      - name: Check the assembled site
+        run: node tools/extractor/test-site.mjs _site
+
+      - name: Show what will be published
+        run: find _site -maxdepth 2 -printf "%P\n" | sort
+
       # Pages must already be enabled on the repository (Settings -> Pages ->
       # Source: GitHub Actions). `enablement: true` cannot do it: creating a
       # Pages site needs repo-administration scope, which GITHUB_TOKEN lacks.
