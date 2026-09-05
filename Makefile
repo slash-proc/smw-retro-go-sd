@@ -65,7 +65,7 @@ BUILD_DIR ?= build/$(PROJECT_KIND)
 PACKED_BIN := Super Mario World.bin
 HB_NAME    := Super Mario World
 COVER_JPG  := $(BUILD_DIR)/cover.jpg
-COVER_SRC  := src/assets/cover_src.jpg
+COVER_SRC  := src/assets/cover_src.png
 
 include $(GNW_CORE_SDK)/Makefile
 

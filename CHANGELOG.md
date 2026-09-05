@@ -49,3 +49,10 @@ When you cut a release:
   spec](https://github.com/slash-proc/gwrg-dist-spec): a `manifest.json`
   declaring both the binary and the extractor, an offline bundle, and a
   GitHub Pages mirror of `dist/` that a web installer can read.
+
+## [v0.0.1]
+
+Initial release of the upstream project,
+[sylverb/smw-retro-go-sd](https://github.com/sylverb/smw-retro-go-sd), as a
+homebrew for Game & Watch Retro-Go SD. This fork's own releases start at
+v0.1.0.
