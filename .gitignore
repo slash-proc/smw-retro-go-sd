@@ -8,5 +8,6 @@
 *.lst
 *_host
 host_saves/
+homebrews/
 .DS_Store
 __pycache__/

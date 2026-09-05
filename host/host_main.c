@@ -16,13 +16,9 @@ extern void app_main(uint8_t load_state, uint8_t start_paused, int8_t save_slot)
 
 int main(int argc, char **argv)
 {
-    const char *title =
-#if defined(PROJECT_KIND_HOMEBREW)
-        "Retro-Go Homebrew (host)";
-#else
-        "Retro-Go Core (host)";
-#endif
+    const char *title = "Super Mario World (host)";
     const char *rom = getenv("HOST_ROM");
+    const char *host_sd = getenv("HOST_SD");
 
     if (argc > 1 && argv[1] && argv[1][0])
         rom = argv[1];
@@ -37,8 +33,14 @@ int main(int argc, char **argv)
     printf("host: Esc or close window to quit\n");
     printf("host: Arrows=D-pad  Z=B  X=A  Enter=Start  Shift=Select  A/S=Y/X\n");
     printf("host: F1=save state  F2=load state  (./host_saves/)\n");
+    printf("host: assets → /homebrews/smw_assets.dat");
+    if (host_sd && host_sd[0])
+        printf(" (HOST_SD=%s)\n", host_sd);
+    else
+        printf(" (or ./homebrews/smw_assets.dat)\n");
+    printf("host: HOST_OFW_MARIO=1 for Mario face-button layout\n");
     if (rom)
-        printf("host: ROM %s\n", rom);
+        printf("host: ROM/path %s\n", rom);
 
     app_main(0, 0, -1);
 

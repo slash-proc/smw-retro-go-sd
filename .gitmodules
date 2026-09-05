@@ -1,0 +1,4 @@
+[submodule "external/smw"]
+	path = external/smw
+	url = https://github.com/sylverb/smw.git
+	branch = filesystem
