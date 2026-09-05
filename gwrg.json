@@ -1,0 +1,45 @@
+{
+  "$comment": "The hand-written half of this project's manifest. Everything else -- sizes, hashes, the firmware ABI, the display name, the module's memory ceiling -- is derived from the built bytes by scripts/make_manifest.py. Nothing derivable belongs here.",
+  "tool": {
+    "id": "smw-assets",
+    "title": {
+      "en": "Super Mario World asset extraction",
+      "fr": "Extraction des ressources de Super Mario World",
+      "de": "Super Mario World Ressourcen-Extraktion"
+    },
+    "maxOutputBytes": 16777216,
+    "options": [],
+    "inputs": [
+      {
+        "id": "base",
+        "required": true,
+        "repeatable": false,
+        "label": {
+          "en": "Super Mario World ROM",
+          "fr": "ROM de Super Mario World",
+          "de": "Super Mario World ROM"
+        },
+        "extensions": [
+          ".sfc",
+          ".smc"
+        ],
+        "maxBytes": 8388608,
+        "variants": [
+          {
+            "id": "us",
+            "sha1": "6B47BB75D16514B6A476AA0C73A683A2A4C18765",
+            "bytes": 524288
+          }
+        ],
+        "strict": false
+      }
+    ],
+    "outputs": [
+      {
+        "id": "assets",
+        "filename": "smw_assets.dat",
+        "maxBytes": 16777216
+      }
+    ]
+  }
+}
