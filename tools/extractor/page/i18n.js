@@ -34,7 +34,7 @@ export const SUPPORTED = [
 const en = {
   app: {
     heading: (title) => `${title} asset converter`,
-    lede: (input, output) => `Convert ${input} into ${output}`,
+    lede: (game, output) => `Convert your ${game} ROM into ${output}`,
   },
   lang: {
     label: "Language",
@@ -46,19 +46,37 @@ const en = {
   },
   why: {
     label: "What this does",
-    text: "The necessary assets are extracted and exported to smw_assets.dat in the browser, never leaving your computer.",
+    text: "Runs in your browser. Your ROM never leaves your computer.",
   },
   input: {
-    heading: "Your files",
-    choose: "Choose a file, or drop one here",
+    heading: "ROM files",
+    choose: "Choose file",
+    none: "No file chosen",
     optional: "optional",
+    // The control on a role the manifest marks repeatable. Deliberately
+    // says nothing about what the extra files are: the role's own
+    // description, which the manifest owns, is right above it.
+    addFile: "+ Add another file",
+    remove: "Remove",
+    alreadyAdded: (name) => `${name} has already been added.`,
+    variantAlreadyAdded: (variant) => `${variant} is already added.`,
+    wrongRole: (name, other, role) =>
+      `${name} is the file for "${other}", not for "${role}".`,
+    // Refusals. Each one names the file, says what was wanted, and gives the
+    // hash the file actually has, so someone with a folder of ROMs can work
+    // out which one they are holding.
+    notTheOne: (name, variant, expected, actual) =>
+      `Needs ${variant}. SHA-1 ${expected}, yours ${actual}.`,
+    notRecognised: (name, role, actual) =>
+      `Not a supported release. SHA-1 ${actual}. See "?" for the list.`,
+    help: "What this is",
+    accepted: "Available:",
+    showHashes: "Accepted hashes",
     reading: (name) => `Reading ${name}…`,
     tooLarge: (name) => `${name} is too big to be the right file.`,
-    recognised: (name, variant) => `${name}: ${variant}.`,
+    recognised: (name, variant) => variant,
     unrecognised: (name, role) =>
       `${name} is not a stock ${role}. Treating it as a modified copy.`,
-    refused: (name, role) =>
-      `${name} is not a ${role} this converter knows, so it cannot be used.`,
     missingRequired: "Choose the required file to continue.",
   },
   run: {
@@ -69,6 +87,33 @@ const en = {
       `${pct}% · ${name} (step ${stage} of ${stages})`,
     timedOut: "This took too long and was stopped.",
     done: (n) => `Done, ${n} file${n === 1 ? "" : "s"} ready.`,
+    tooBig: (name, size, max) =>
+      `${name} came out at ${size} bytes, more than the ${max} its manifest allows.`,
+  },
+  version: {
+    label: "Version",
+    // A prerelease is opt-in: it is offered only once someone asks to see one.
+    showPrereleases: "Show pre-releases",
+    prerelease: "pre-release",
+    // The firmware requirement, shown per version because this is the only
+    // place a user learns it. A binary built for a newer ABI hardfaults on
+    // device with nothing on screen to explain why.
+    abi: (version, minSize) => `firmware ABI ${version}+ (${minSize} bytes)`,
+    retained: (n) => `Showing the ${n} most recent releases.`,
+    olderReleases: "Older releases",
+    pinned: (tag) => `Version ${tag}`,
+    noConverter: "This version needs no conversion: install the published files as they are.",
+  },
+  zip: {
+    button: "Download everything",
+    note: (names) => `One zip: ${names}`,
+    building: "Fetching the published files and packing them…",
+    ready: (name, bytes) => `${name} saved, ${bytes.toLocaleString("en-GB")} bytes.`,
+    failed: (msg) => `Could not build the zip: ${msg}`,
+    fetchFailed: (name, status) => `could not fetch ${name} (${status})`,
+    sizeMismatch: (name, got, want) =>
+      `${name} is ${got} bytes, but its manifest says ${want}`,
+    hashMismatch: (name) => `${name} does not match the hash in its manifest`,
   },
   results: {
     heading: "Output",
@@ -81,12 +126,12 @@ const en = {
   footer: {
     source: "Source and documentation:",
     repo: "the project repository",
-    published:
-      "This page comes from the same CI run that builds and checks the converter, so the two always match.",
+    published: "",
   },
   fatal: {
     cannotRun: (msg) => `This page cannot run: ${msg}`,
     noManifest: "the converter manifest could not be loaded",
+    noVersions: "this site publishes no versions",
     mismatch: "the converter does not match its manifest",
     unsafe: (errs) => `the converter failed its safety checks: ${errs}`,
   },
@@ -95,7 +140,7 @@ const en = {
 const fr = {
   app: {
     heading: (title) => `Convertisseur de ressources ${title}`,
-    lede: (input, output) => `Convertir ${input} en ${output}`,
+    lede: (game, output) => `Convertissez votre ROM ${game} en ${output}`,
   },
   lang: {
     label: "Langue",
@@ -107,19 +152,31 @@ const fr = {
   },
   why: {
     label: "Ce que fait cette page",
-    text: "Les ressources nécessaires sont extraites et enregistrées dans smw_assets.dat directement dans le navigateur. Rien ne quitte votre ordinateur.",
+    text: "Tout se passe dans votre navigateur. Votre ROM ne quitte pas votre ordinateur.",
   },
   input: {
-    heading: "Vos fichiers",
-    choose: "Choisissez un fichier, ou déposez-le ici",
+    heading: "Fichiers ROM",
+    choose: "Choisir un fichier",
+    none: "Aucun fichier choisi",
     optional: "facultatif",
+    addFile: "+ Ajouter un fichier",
+    remove: "Retirer",
+    alreadyAdded: (name) => `${name} a déjà été ajouté.`,
+    variantAlreadyAdded: (variant) => `${variant} est déjà ajouté.`,
+    wrongRole: (name, other, role) =>
+      `${name} correspond à « ${other} », pas à « ${role} ».`,
+    notTheOne: (name, variant, expected, actual) =>
+      `Il faut ${variant}. SHA-1 ${expected}, le vôtre ${actual}.`,
+    notRecognised: (name, role, actual) =>
+      `Version non prise en charge. SHA-1 ${actual}. Voir « ? » pour la liste.`,
+    help: "Ce que c'est",
+    accepted: "Disponibles :",
+    showHashes: "Empreintes acceptées",
     reading: (name) => `Lecture de ${name}…`,
     tooLarge: (name) => `${name} est trop volumineux pour être le bon fichier.`,
-    recognised: (name, variant) => `${name} : ${variant}.`,
+    recognised: (name, variant) => variant,
     unrecognised: (name, role) =>
       `${name} n'est pas un ${role} d'origine. Il sera traité comme une copie modifiée.`,
-    refused: (name, role) =>
-      `${name} n'est pas un ${role} connu de ce convertisseur : il ne peut pas être utilisé.`,
     missingRequired: "Choisissez le fichier requis pour continuer.",
   },
   run: {
@@ -130,6 +187,29 @@ const fr = {
       `${pct} % · ${name} (étape ${stage} sur ${stages})`,
     timedOut: "L'opération a pris trop de temps et a été interrompue.",
     done: (n) => `Terminé, ${n} fichier${n === 1 ? "" : "s"} prêt${n === 1 ? "" : "s"}.`,
+    tooBig: (name, size, max) =>
+      `${name} fait ${size} octets, plus que les ${max} autorisés par son manifeste.`,
+  },
+  version: {
+    label: "Version",
+    showPrereleases: "Afficher les préversions",
+    prerelease: "préversion",
+    abi: (version, minSize) => `ABI firmware ${version}+ (${minSize} octets)`,
+    retained: (n) => `Les ${n} versions les plus récentes.`,
+    olderReleases: "Versions plus anciennes",
+    pinned: (tag) => `Version ${tag}`,
+    noConverter: "Cette version ne demande aucune conversion : installez les fichiers publiés tels quels.",
+  },
+  zip: {
+    button: "Tout télécharger",
+    note: (names) => `Une archive : ${names}`,
+    building: "Récupération des fichiers publiés et création de l'archive…",
+    ready: (name, bytes) => `${name} enregistré, ${bytes.toLocaleString("fr-FR")} octets.`,
+    failed: (msg) => `Impossible de créer l'archive : ${msg}`,
+    fetchFailed: (name, status) => `${name} n'a pas pu être récupéré (${status})`,
+    sizeMismatch: (name, got, want) =>
+      `${name} fait ${got} octets alors que son manifeste en annonce ${want}`,
+    hashMismatch: (name) => `${name} ne correspond pas à l'empreinte de son manifeste`,
   },
   results: {
     heading: "Sortie",
@@ -142,12 +222,12 @@ const fr = {
   footer: {
     source: "Code source et documentation :",
     repo: "le dépôt du projet",
-    published:
-      "Cette page provient de la même exécution CI qui compile et vérifie le convertisseur. Les deux correspondent donc toujours.",
+    published: "",
   },
   fatal: {
     cannotRun: (msg) => `Cette page ne peut pas fonctionner : ${msg}`,
     noManifest: "le manifeste du convertisseur n'a pas pu être chargé",
+    noVersions: "ce site ne publie aucune version",
     mismatch: "le convertisseur ne correspond pas à son manifeste",
     unsafe: (errs) => `le convertisseur a échoué aux contrôles de sécurité : ${errs}`,
   },
@@ -156,7 +236,7 @@ const fr = {
 const de = {
   app: {
     heading: (title) => `${title} Asset-Konverter`,
-    lede: (input, output) => `${input} in ${output} umwandeln`,
+    lede: (game, output) => `Wandle dein ${game} ROM in ${output} um`,
   },
   lang: {
     label: "Sprache",
@@ -168,19 +248,31 @@ const de = {
   },
   why: {
     label: "Was hier passiert",
-    text: "Die benötigten Assets werden direkt im Browser ausgelesen und in smw_assets.dat gespeichert. Nichts wird hochgeladen, alles bleibt auf deinem Rechner.",
+    text: "Läuft im Browser. Dein ROM bleibt auf deinem Rechner.",
   },
   input: {
-    heading: "Deine Dateien",
-    choose: "Datei auswählen oder hierher ziehen",
+    heading: "ROM-Dateien",
+    choose: "Datei auswählen",
+    none: "Keine Datei ausgewählt",
     optional: "optional",
+    addFile: "+ Weitere Datei hinzufügen",
+    remove: "Entfernen",
+    alreadyAdded: (name) => `${name} wurde schon hinzugefügt.`,
+    variantAlreadyAdded: (variant) => `${variant} ist schon dabei.`,
+    wrongRole: (name, other, role) =>
+      `${name} gehört zu „${other}“ und nicht zu „${role}“.`,
+    notTheOne: (name, variant, expected, actual) =>
+      `Gebraucht wird ${variant}. SHA-1 ${expected}, deins ${actual}.`,
+    notRecognised: (name, role, actual) =>
+      `Keine unterstützte Version. SHA-1 ${actual}. Liste im „?“.`,
+    help: "Was das ist",
+    accepted: "Verfügbar:",
+    showHashes: "Akzeptierte Prüfsummen",
     reading: (name) => `${name} wird gelesen…`,
     tooLarge: (name) => `${name} ist zu groß für die erwartete Datei.`,
-    recognised: (name, variant) => `${name}: ${variant}.`,
+    recognised: (name, variant) => variant,
     unrecognised: (name, role) =>
       `${name} ist kein unverändertes ${role}. Es wird als bearbeitete Fassung behandelt.`,
-    refused: (name, role) =>
-      `${name} ist kein ${role}, das dieser Konverter kennt, und kann nicht verwendet werden.`,
     missingRequired: "Wähle die benötigte Datei aus, um weiterzumachen.",
   },
   run: {
@@ -191,6 +283,29 @@ const de = {
       `${pct} % · ${name} (Schritt ${stage} von ${stages})`,
     timedOut: "Das hat zu lange gedauert und wurde abgebrochen.",
     done: (n) => `Fertig, ${n} Datei${n === 1 ? "" : "en"} bereit.`,
+    tooBig: (name, size, max) =>
+      `${name} ist ${size} Bytes groß, mehr als die im Manifest erlaubten ${max}.`,
+  },
+  version: {
+    label: "Version",
+    showPrereleases: "Vorabversionen anzeigen",
+    prerelease: "Vorabversion",
+    abi: (version, minSize) => `Firmware-ABI ${version}+ (${minSize} Bytes)`,
+    retained: (n) => `Die ${n} neuesten Versionen.`,
+    olderReleases: "Ältere Versionen",
+    pinned: (tag) => `Version ${tag}`,
+    noConverter: "Diese Version braucht keine Umwandlung: installiere die veröffentlichten Dateien so, wie sie sind.",
+  },
+  zip: {
+    button: "Alles herunterladen",
+    note: (names) => `Ein Archiv: ${names}`,
+    building: "Die veröffentlichten Dateien werden geholt und gepackt…",
+    ready: (name, bytes) => `${name} gespeichert, ${bytes.toLocaleString("de-DE")} Bytes.`,
+    failed: (msg) => `Das Archiv konnte nicht erstellt werden: ${msg}`,
+    fetchFailed: (name, status) => `${name} konnte nicht geladen werden (${status})`,
+    sizeMismatch: (name, got, want) =>
+      `${name} hat ${got} Bytes, das Manifest nennt aber ${want}`,
+    hashMismatch: (name) => `${name} passt nicht zur Prüfsumme im Manifest`,
   },
   results: {
     heading: "Ausgabe",
@@ -203,12 +318,12 @@ const de = {
   footer: {
     source: "Quellcode und Dokumentation:",
     repo: "das Projekt-Repository",
-    published:
-      "Diese Seite stammt aus demselben CI-Lauf, der den Konverter baut und prüft. Beides passt also immer zusammen.",
+    published: "",
   },
   fatal: {
     cannotRun: (msg) => `Diese Seite funktioniert nicht: ${msg}`,
     noManifest: "das Manifest des Konverters konnte nicht geladen werden",
+    noVersions: "diese Seite veröffentlicht keine Versionen",
     mismatch: "der Konverter passt nicht zu seinem Manifest",
     unsafe: (errs) => `der Konverter hat die Sicherheitsprüfungen nicht bestanden: ${errs}`,
   },

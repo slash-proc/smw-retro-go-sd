@@ -32,7 +32,7 @@ const check = (name, cond, detail = "") => {
 // --- the files the page itself is made of -----------------------------------
 
 for (const f of ["index.html", "app.js", "worker.js", "i18n.js", "style.css",
-                 "verify.mjs", "extract.mjs", "config.json"]) {
+                 "verify.mjs", "extract.mjs", "zip.mjs", "config.json"]) {
   check(`site has ${f}`, existsSync(join(site, f)));
 }
 
@@ -47,15 +47,52 @@ if (!existsSync(cfgPath)) {
   process.exit(1);
 }
 const cfg = JSON.parse(readFileSync(cfgPath, "utf8"));
-check("config.json names a manifest", typeof cfg.manifestUrl === "string" && cfg.manifestUrl);
+const entry = cfg.versionsUrl ?? cfg.manifestUrl;
+check("config.json names a starting point", typeof entry === "string" && Boolean(entry),
+  JSON.stringify(cfg));
 
-// The page resolves manifestUrl relative to itself, so it must stay inside the
-// site. An absolute URL would make the page depend on another origin, which is
-// the thing the mirror exists to avoid.
-check("manifestUrl is relative", !/^[a-z]+:\/\//i.test(cfg.manifestUrl), cfg.manifestUrl);
+// The page resolves it relative to itself, so it must stay inside the site. An
+// absolute URL would make the page depend on another origin, which is the
+// thing the mirror exists to avoid.
+check("the configured url is relative", !/^[a-z]+:\/\//i.test(entry ?? ""), entry);
 
-const manifestPath = resolve(site, cfg.manifestUrl);
-check("the manifest it names exists", existsSync(manifestPath), cfg.manifestUrl);
+// A pinned build names one manifest and shows no picker; the normal build
+// names the index and offers every version the mirror holds. Both are valid,
+// and the page has to arrive at a manifest either way.
+let manifestPath;
+if (cfg.versionsUrl) {
+  const indexPath = resolve(site, cfg.versionsUrl);
+  check("the version index exists", existsSync(indexPath), cfg.versionsUrl);
+  if (!existsSync(indexPath)) {
+    console.log("\nthe page would fail to load: no versions.json at its configured URL");
+    process.exit(1);
+  }
+  const index = JSON.parse(readFileSync(indexPath, "utf8"));
+  check("index schemaVersion is 1", index.schemaVersion === 1, String(index.schemaVersion));
+  const versions = index.versions ?? [];
+  check("index lists at least one version", versions.length > 0, String(versions.length));
+
+  // The page takes versions[0] as the default without sorting, because the
+  // spec guarantees newest-first. If that is ever untrue the page silently
+  // offers the wrong default, so it is checked here rather than trusted.
+  const dates = versions.map((v) => Date.parse(v.publishedAt)).filter((n) => !Number.isNaN(n));
+  const ordered = dates.every((d, i) => i === 0 || dates[i - 1] >= d);
+  check("index is newest-first", ordered, versions.map((v) => v.tag).join(", "));
+
+  // Every version the picker offers has to be loadable, not just the default:
+  // switching to an older one must not land on a 404.
+  for (const v of versions) {
+    const p = resolve(dirname(indexPath), v.manifest);
+    check(`${v.tag}: its manifest is mirrored`, existsSync(p), v.manifest);
+  }
+
+  const def = versions.find((v) => !v.prerelease) ?? versions[0];
+  check("a non-prerelease default exists", Boolean(def), def?.tag);
+  manifestPath = resolve(dirname(indexPath), def.manifest);
+} else {
+  manifestPath = resolve(site, cfg.manifestUrl);
+  check("the manifest it names exists", existsSync(manifestPath), cfg.manifestUrl);
+}
 if (!existsSync(manifestPath)) {
   console.log("\nthe page would fail to load: no manifest at its configured URL");
   process.exit(1);
@@ -85,6 +122,24 @@ check("tool declares outputs", Array.isArray(tool.outputs) && tool.outputs.lengt
 // page would silently send flags: 0 and get a different run than it showed.
 for (const opt of tool.options ?? []) {
   check(`option ${opt.id} declares a bit`, Number.isInteger(opt.bit), String(opt.bit));
+}
+
+// A variant id has to be unique within its input: it is what a page uses to
+// tell one accepted file from another, and this project has two releases of
+// the same script that only their ids separate. JSON Schema cannot say this.
+for (const inp of tool.inputs) {
+  const ids = (inp.variants ?? []).map((v) => v.id);
+  const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
+  check(`input ${inp.id}: variant ids are unique`, dupes.length === 0, dupes.join(", "));
+}
+
+// A strict input with nothing to match is a slot no file can ever fill: the
+// host refuses anything unrecognised, and every file is unrecognised.
+for (const inp of tool.inputs) {
+  const strict = inp.strict !== false;
+  const known = (inp.variants ?? []).length;
+  check(`input ${inp.id}: strict input has variants to match`, !strict || known > 0,
+    strict ? `strict with ${known} variant(s)` : "not strict");
 }
 
 // --- the module resolves beside the manifest, and is the one described ------

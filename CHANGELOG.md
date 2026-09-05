@@ -14,6 +14,46 @@ When you cut a release:
 
 ## [Unreleased]
 
+## [v0.3.0] - 2026-09-06
+
+### Added
+
+- A version picker. The page reads this site's own `dist/versions.json`,
+  offers every version the mirror holds and defaults to the newest, so a
+  release reaches users without redeploying the page. Switching version
+  reloads the module, its inputs and its accepted hashes, and discards any
+  file already chosen: a file one version accepts another may refuse, and
+  carrying it over would start a run on input this version never approved.
+  Pre-releases are hidden until asked for, and each version shows the
+  firmware ABI it needs, which is the only place a user learns it.
+- A single download containing the whole install: the artifacts the project
+  published plus the file the run just produced, as
+  `smw-<tag>-gwrg.zip`. The converted file on its own was only half of what
+  somebody needs, and the manifest already named and hashed the other half.
+  Published files are fetched, checked against the size and hash the
+  manifest declares, and a mismatch refuses the zip rather than shipping a
+  broken install.
+- `zip.mjs`, a dependency-free zip writer. Entries are deflated where that
+  helps and stored where it does not; a browser without `CompressionStream`
+  stores everything and still produces a valid archive.
+- `test-i18n.mjs`, which demands every string the page asks for from every
+  locale it offers. A renamed key used to be invisible: the page still
+  loads and the control is simply blank for that language.
+
+### Changed
+
+- The page is now byte-identical to the one zelda3 ships, and carries no
+  fact about any particular game. `smw_assets.dat` was written into the
+  privacy note in all three languages; it comes from the manifest now.
+  The page also gained repeatable inputs, per-role help, refusals that say
+  what a file actually hashed to, and a picker that notices when the same
+  file is chosen twice.
+- `outputs[].maxBytes` is enforced. The manifest states a ceiling per output
+  as well as one for the whole run, and only the second was being applied.
+- `config.json` points at the version index rather than one manifest.
+  `MANIFEST_URL` still pins a build to a single manifest, which is what an
+  offline bundle needs.
+
 ## [v0.2.0] - 2026-09-05
 
 ### Changed
