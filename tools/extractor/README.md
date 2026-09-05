@@ -42,11 +42,11 @@ the SMW implementation of it, plus the checks that gate a release.
 | `src/lib.rs` | the wasm ABI |
 | `verify.mjs` | conformance verifier — dependency-free, browser or node |
 | `extract.mjs` | host runner (verify + instantiate + drive) |
-| `manifest.mjs` | release manifest generator |
 | `record-reference.mjs` | records verified output hashes, run only by `check.sh` |
 | `test.mjs` | verifier tests: non-conformant modules that must be rejected |
 | `test-abi.mjs` | ABI behaviour: errors, flags, cancellation, stepped/one-shot parity |
 | `test-page.mjs` | drives the published page in a real browser |
+| `test-site.mjs` | checks an assembled site's wiring; no browser needed |
 | `page/` | the manual conversion site ([`page/README.md`](page/README.md)) |
 | `build-page.sh` | assembles `site/` from the page and the built module |
 
