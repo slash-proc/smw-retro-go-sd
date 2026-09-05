@@ -150,6 +150,13 @@ def manifest_problem(manifest: dict) -> str | None:
             extra = set(output) - {"id", "filename", "maxBytes"}
             if extra:
                 return f"output has fields the spec removed: {', '.join(sorted(extra))}"
+        for inp in tool.get("inputs", []):
+            extra = set(inp) - {
+                "id", "required", "repeatable", "label", "description",
+                "extensions", "maxBytes", "variants", "strict",
+            }
+            if extra:
+                return f"input has fields the spec removed: {', '.join(sorted(extra))}"
     return None
 
 
