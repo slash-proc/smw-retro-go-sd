@@ -12,7 +12,6 @@
 
 import { verify } from "./verify.mjs";
 
-export const FLAG_NO_HASH_CHECK = 1 << 0;
 export const FLAG_NO_INCLUDE_ROM = 1 << 1;
 
 export const ABI_VERSION = 1;

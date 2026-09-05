@@ -218,6 +218,7 @@ impl Ctx {
     /// phase; this is the part that must succeed before any phase can run.
     pub fn new(rom: Rom, include_rom: bool) -> Result<Ctx> {
         let lunar_magic = rom.get_bytes(0xFF0A0, 5)? == b"Lunar";
+        let is_known = rom.is_known;
 
         let mut c = Ctx {
             rom,
@@ -227,6 +228,17 @@ impl Ctx {
             include_rom,
             warnings: Vec::new(),
         };
+
+        // The host already decided this ROM was acceptable; all the module can
+        // usefully add is that the extraction was not written against it, so a
+        // surprising result has an explanation attached.
+        if !is_known {
+            c.warnings.push(
+                "This is not the Super Mario World (USA) ROM this extraction was written \
+                 against. Proceeding anyway; the result may be incomplete."
+                    .to_string(),
+            );
+        }
 
         if lunar_magic {
             let s = String::from_utf8_lossy(&c.bs(0xFF0A0, 24)?).to_string();

@@ -12,23 +12,28 @@ pub const SMW_SHA1_US: &str = "6B47BB75D16514B6A476AA0C73A683A2A4C18765";
 
 pub struct Rom {
     pub data: Vec<u8>,
+    /// Whether this is the ROM the extraction was written against. False for a
+    /// Lunar Magic hack or any other edit, which is normal and not an error.
+    pub is_known: bool,
 }
 
 impl Rom {
     /// Mirrors `LoadedRom.__init__`: strip a 512-byte SMC copier header if
-    /// present, then gate on the US SHA-1 unless the caller bypasses it.
-    pub fn new(mut data: Vec<u8>, disable_hash_check: bool) -> Result<Rom> {
+    /// present, then note whether the result is the ROM we know.
+    ///
+    /// Whether an unrecognised ROM may be used at all is not decided here. The
+    /// host decides it, before this module is ever handed the bytes, from the
+    /// input's `strict` flag and its declared variants -- see the spec's
+    /// spec/05-host.md. A module that refused here as well would be a second
+    /// opinion on a question that has one answer, and the only way for the two
+    /// to differ is for one of them to be wrong.
+    pub fn new(mut data: Vec<u8>) -> Result<Rom> {
         if (data.len() & 0xfffff) == 0x200 {
             data.drain(..0x200);
         }
         let hash = crate::hash::hex_upper(&crate::hash::sha1(&data));
-        let is_us = hash == SMW_SHA1_US;
-        if !disable_hash_check && !is_us {
-            return Err(format!(
-                "ROM with hash {hash} not supported.\n\nExpected {SMW_SHA1_US}.\nPlease verify your ROM is \"Super Mario World\"."
-            ));
-        }
-        Ok(Rom { data })
+        let is_known = hash == SMW_SHA1_US;
+        Ok(Rom { data, is_known })
     }
 
     #[inline]

@@ -57,6 +57,8 @@ const en = {
     recognised: (name, variant) => `${name}: ${variant}.`,
     unrecognised: (name, role) =>
       `${name} is not a stock ${role}. Treating it as a modified copy.`,
+    refused: (name, role) =>
+      `${name} is not a ${role} this converter knows, so it cannot be used.`,
     missingRequired: "Choose the required file to continue.",
   },
   run: {
@@ -116,6 +118,8 @@ const fr = {
     recognised: (name, variant) => `${name} : ${variant}.`,
     unrecognised: (name, role) =>
       `${name} n'est pas un ${role} d'origine. Il sera traité comme une copie modifiée.`,
+    refused: (name, role) =>
+      `${name} n'est pas un ${role} connu de ce convertisseur : il ne peut pas être utilisé.`,
     missingRequired: "Choisissez le fichier requis pour continuer.",
   },
   run: {
@@ -175,6 +179,8 @@ const de = {
     recognised: (name, variant) => `${name}: ${variant}.`,
     unrecognised: (name, role) =>
       `${name} ist kein unverändertes ${role}. Es wird als bearbeitete Fassung behandelt.`,
+    refused: (name, role) =>
+      `${name} ist kein ${role}, das dieser Konverter kennt, und kann nicht verwendet werden.`,
     missingRequired: "Wähle die benötigte Datei aus, um weiterzumachen.",
   },
   run: {

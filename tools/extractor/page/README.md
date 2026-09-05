@@ -34,8 +34,10 @@ the check while its content is something a user wants. On failure the page says
 it cannot run, and why.
 
 **No expert controls.** An unrecognised ROM is almost always a Lunar Magic
-hack, so the page sets `noHashCheck` itself and says what it assumed, rather
-than exposing a checkbox nobody can evaluate.
+hack, so the page accepts it and says what it assumed, rather than exposing a
+checkbox nobody can evaluate. That is the manifest's `strict: false` on the
+base input; an input that is strict gets the opposite treatment, and the file
+is refused before a run is spent.
 
 **Verdicts, not hashes.** The output shows `Hash matches ✓`; the 64 characters
 are one click away for anyone who wants to compare them.

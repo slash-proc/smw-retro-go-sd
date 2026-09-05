@@ -47,16 +47,24 @@ try {
   check("rejects reserved flag bits", false, "-> accepted");
 } catch (e) { check("rejects reserved flag bits", /flag/i.test(e.message), `-> ${e.message}`); }
 
-// a modified ROM: hash check off, as the page does for a hack
+// A modified ROM converts, with no flag involved. Admission is the host's
+// call, made from the input's `strict` flag before the module sees anything;
+// what the module owes is a run and a warning, not a refusal.
 const hacked = rom.slice(); hacked[0x7FD0] ^= 0xff;
 try {
-  const r = await extract(wasm, hacked, { flags: 1 });
-  check("runs a modified ROM with noHashCheck", r.outputs.length === 1);
-} catch (e) { check("runs a modified ROM with noHashCheck", false, `-> ${e.message}`); }
+  const r = await extract(wasm, hacked, { flags: 0 });
+  check("runs a modified ROM", r.outputs.length === 1);
+  check("warns that the ROM is not the one it knows",
+    r.warnings.some((w) => /not the Super Mario World \(USA\) ROM/.test(w)),
+    `-> ${JSON.stringify(r.warnings)}`);
+} catch (e) { check("runs a modified ROM", false, `-> ${e.message}`); }
+
+// Bit 0 carried that decision and is retired. An old caller still setting it
+// must be told, not silently given whatever bit 0 means now.
 try {
-  await extract(wasm, hacked, { flags: 0 });
-  check("refuses a modified ROM without the flag", false, "-> accepted");
-} catch (e) { check("refuses a modified ROM without the flag", true); }
+  await extract(wasm, rom, { flags: 1 });
+  check("rejects the retired hash-check bit", false, "-> accepted");
+} catch (e) { check("rejects the retired hash-check bit", /flag/i.test(e.message), `-> ${e.message}`); }
 
 // --no-include-rom must actually shrink the output
 const withRom = await extract(wasm, rom, { flags: 0 });

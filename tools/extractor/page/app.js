@@ -293,15 +293,26 @@ function buildRoleInputs() {
   }
 }
 
+/**
+ * Whether this input insists on a file it recognises. `strict` defaults to
+ * true: an input that says nothing wants a known hash. smw's base ROM sets it
+ * false, because a Lunar Magic hack cannot match a known hash by construction.
+ */
+const isStrict = (role) => role.strict !== false;
+
 function renderFileStatus(role, got) {
   const status = document.getElementById(`status-${role.id}`);
   if (got.variant) {
     setStatus(status, "ok", t().input.recognised(got.name, localeText(got.variant.label)));
+  } else if (isStrict(role)) {
+    // Refused here, before a run is spent. This is the host's call to make --
+    // the module is handed only files that got past this point, and does not
+    // second-guess them.
+    setStatus(status, "bad", t().input.refused(got.name, localeText(role.label)));
   } else {
-    // An unrecognised file is almost always a ROM hack, which by definition
-    // cannot match a known hash. Rather than making the user find and
-    // understand a checkbox, accept it and say what we assumed. If it is not
-    // the right game at all, the extraction fails on its own.
+    // Not strict: almost always a ROM hack, which by definition cannot match a
+    // known hash. Accept it and say what was assumed. If it is not the right
+    // game at all, the extraction fails on its own.
     setStatus(status, "warn", t().input.unrecognised(got.name, localeText(role.label)));
   }
 }
@@ -328,7 +339,10 @@ async function acceptFile(role, file) {
   const variant = (role.variants ?? []).find((v) => v.sha1 === sha1) ?? null;
 
   const got = { bytes, sha1, name: file.name, variant };
-  state.files.set(role.id, got);
+  // A strict input with no matching variant is refused: it is shown, but it is
+  // not a file this run may use, so it never enters state.files and cannot
+  // satisfy a required role.
+  if (variant || !isStrict(role)) state.files.set(role.id, got);
 
   document.querySelector(`#role-${role.id} .drop-prompt`).textContent = file.name;
   renderFileStatus(role, got);
@@ -369,7 +383,6 @@ async function run() {
   // Registration order follows the manifest's role order, but the module
   // identifies each file by content, so the order is a convenience only.
   const ordered = roles().map((r) => state.files.get(r.id)).filter(Boolean);
-  const anyUnrecognised = ordered.some((f) => !f.variant);
 
   const worker = new Worker("worker.js", { type: "module" });
   // The ABI has no cancel flag, so this is what a timeout means: stop the
@@ -403,7 +416,9 @@ async function run() {
   worker.postMessage({
     wasmBytes: state.wasmBytes,
     inputs: ordered.map((f) => f.bytes),
-    flags: anyUnrecognised ? optionMask(state.tool, "noHashCheck") : 0,
+    // Nothing to set. Whether an unrecognised file was allowed is settled
+    // before a run, by `strict` above, and the module is told nothing about it.
+    flags: 0,
     expectedOutputs: state.tool.outputs.map((o) => o.filename),
     maxOutputBytes: state.tool.limits?.maxOutputBytes,
   });
@@ -474,16 +489,6 @@ async function showResults({ outputs, warnings }) {
     list.append(li);
   }
   results.hidden = false;
-}
-
-/**
- * The flag mask for a declared option, or 0 when this project does not declare
- * it. `options[]` gives each option a bit; unlisted bits are reserved and must
- * be zero, so an unknown id contributes nothing rather than guessing a bit.
- */
-function optionMask(tool, id) {
-  const opt = (tool.options ?? []).find((o) => o.id === id);
-  return opt ? 1 << opt.bit : 0;
 }
 
 /** True when the files the user supplied are the ones the reference run used. */

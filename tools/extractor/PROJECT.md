@@ -18,10 +18,13 @@ Accepted variants of `base`:
 |---|---|---|
 | Super Mario World (USA) | `6B47BB75D16514B6A476AA0C73A683A2A4C18765` | 524,288 |
 
-A ROM whose hash is not listed is accepted only with the `noHashCheck` flag,
-which is what a Lunar Magic hack requires — by construction it cannot match a
-known hash. Hosts should set this automatically for an unrecognised file rather
-than exposing it as a control; it is not a decision a user can make usefully.
+A ROM whose hash is not listed is still converted. A Lunar Magic hack cannot
+match a known hash by construction, so the manifest declares this input
+`strict: false` and the host lets an unrecognised file through; the module says
+so in `warnings` and carries on.
+
+The module does not enforce the hash itself. Admission is decided once, by the
+host, before the run — see the spec's `spec/05-host.md`.
 
 Lunar Magic ROMs must be version 3.33. Anything else is refused with an
 explanation.
@@ -42,10 +45,15 @@ nobody checked.
 
 | Bit | Name | |
 |---|---|---|
-| 0 | `noHashCheck` | accept a ROM whose hash is unknown (Lunar Magic) |
+| 0 | — | retired; was `noHashCheck`, now the input's `strict` flag |
 | 1 | `noIncludeRom` | omit the source ROM from the output |
 
-Unrecognised bits are rejected rather than ignored.
+Unrecognised bits are rejected rather than ignored, bit 0 included: a caller
+still setting it is working from the old contract and should be told, not
+silently given a run that means something else.
+
+The manifest declares no options. `noIncludeRom` remains in the module but is
+not offered, so every published run includes the ROM data.
 
 ## Status codes
 

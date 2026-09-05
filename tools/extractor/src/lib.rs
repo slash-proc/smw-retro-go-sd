@@ -27,9 +27,13 @@
 //!   warnings_len() -> u32
 //! ```
 //!
-//! `flags` bit 0 bypasses the ROM hash check (needed for Lunar Magic ROMs);
-//! bit 1 omits the source ROM from the output. Remaining bits are reserved and
-//! must be zero.
+//! `flags` bit 1 omits the source ROM from the output. Remaining bits are
+//! reserved and must be zero.
+//!
+//! There is no flag for accepting an unrecognised ROM. Whether one may be used
+//! is settled by the host before the run, from the input's `strict` flag in the
+//! manifest; this module converts what it is given and reports an unfamiliar
+//! ROM through `warnings`.
 //!
 //! The host writes each file into a buffer returned by `alloc`, registers it
 //! with `input_add`, calls `run`, and reads the results back out of linear
@@ -58,7 +62,10 @@ pub mod rom;
 
 pub const ABI_VERSION: u32 = 1;
 
-pub const FLAG_NO_HASH_CHECK: u32 = 1 << 0;
+/// Bit 0 is retired. It meant "skip the ROM hash check", which is now the
+/// host's decision and not expressible here. Left unused rather than reassigned
+/// so an old caller setting it gets ERR_BAD_FLAGS instead of silently getting
+/// whatever bit 0 came to mean next.
 pub const FLAG_NO_INCLUDE_ROM: u32 = 1 << 1;
 
 /// The name of the single file this extractor produces.
@@ -77,7 +84,7 @@ pub const STEP_MORE: u32 = 1;
 /// ROM in, `smw_assets.dat` out. The only entry point; everything else in this
 /// crate is reachable from here.
 pub fn run_extraction(input: Vec<u8>, flags: u32) -> Result<extract::Extraction, String> {
-    let rom = rom::Rom::new(input, flags & FLAG_NO_HASH_CHECK != 0)?;
+    let rom = rom::Rom::new(input)?;
     extract::extract(rom, flags & FLAG_NO_INCLUDE_ROM == 0)
 }
 
@@ -270,7 +277,7 @@ pub extern "C" fn run_begin(flags: u32) -> u32 {
         SESSION = None;
     }
 
-    if flags & !(FLAG_NO_HASH_CHECK | FLAG_NO_INCLUDE_ROM) != 0 {
+    if flags & !FLAG_NO_INCLUDE_ROM != 0 {
         return fail(ERR_BAD_FLAGS, "unrecognised flag bits set".into());
     }
 
@@ -285,7 +292,7 @@ pub extern "C" fn run_begin(flags: u32) -> u32 {
     }
     let input = inputs.pop().unwrap();
 
-    let rom = match rom::Rom::new(input, flags & FLAG_NO_HASH_CHECK != 0) {
+    let rom = match rom::Rom::new(input) {
         Ok(r) => r,
         Err(e) => return fail(ERR_EXTRACTION, e),
     };

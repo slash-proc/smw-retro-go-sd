@@ -4,13 +4,12 @@
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 3 {
-        eprintln!("usage: {} <rom.sfc> <out.dat> [--no-hash-check] [--no-include-rom]", args[0]);
+        eprintln!("usage: {} <rom.sfc> <out.dat> [--no-include-rom]", args[0]);
         std::process::exit(2);
     }
     let mut flags = 0;
     for a in &args[3..] {
         match a.as_str() {
-            "--no-hash-check" => flags |= smw_restool::FLAG_NO_HASH_CHECK,
             "--no-include-rom" => flags |= smw_restool::FLAG_NO_INCLUDE_ROM,
             other => {
                 eprintln!("unknown flag {other}");

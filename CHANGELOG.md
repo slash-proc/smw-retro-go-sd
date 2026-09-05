@@ -14,6 +14,28 @@ When you cut a release:
 
 ## [Unreleased]
 
+## [v0.2.0] - 2026-09-05
+
+### Changed
+
+- Whether an unrecognised ROM may be used is now the host's decision, taken
+  before the run, from the manifest's new `inputs[].strict` field. This
+  project's base ROM is `strict: false`, because a Lunar Magic hack cannot
+  match a known hash by construction.
+- The extractor no longer refuses a ROM it does not recognise. It converts it
+  and says so through `warnings`, leaving admission to the one party that has
+  the file, the hashes and the user in front of it.
+- The conversion page enforces `strict` itself: it hashes each file, refuses a
+  stranger for a strict input, and warns for one that is not.
+
+### Removed
+
+- Flag bit 0, `noHashCheck`. Its job is now `strict`, and a caller still
+  setting it gets an error rather than a run that means something else.
+- Both `options[]` entries. `noHashCheck` is replaced; `noIncludeRom` is not
+  something this project wants offered, so the manifest declares `"options":
+  []` and the ROM data is always included.
+
 ## [v0.1.0] - 2026-09-05
 
 ### Added

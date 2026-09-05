@@ -185,28 +185,13 @@ def build_tool(wasm_path: Path) -> dict:
             "maxMemoryPages": module_memory_ceiling(),
             "maxOutputBytes": MAX_OUTPUT_BYTES,
         },
-        "options": [
-            {
-                "id": "noHashCheck",
-                "bit": 0,
-                "default": False,
-                "label": loc(
-                    "Accept a modified ROM",
-                    "Accepter une ROM modifiée",
-                    "Ein verändertes ROM akzeptieren",
-                ),
-            },
-            {
-                "id": "noIncludeRom",
-                "bit": 1,
-                "default": False,
-                "label": loc(
-                    "Leave the ROM data out of the asset pack",
-                    "Exclure les données de la ROM du pack de ressources",
-                    "ROM-Daten nicht in das Ressourcenpaket aufnehmen",
-                ),
-            },
-        ],
+        # No user-settable choices. What was here was not a choice a user could
+        # make usefully: one bit bypassed the ROM hash check, which is now the
+        # input's `strict` flag and the host's decision, and the other omitted
+        # the ROM data from the pack, which is not something this project wants
+        # offered. Stated explicitly, because an absent key cannot be told from
+        # a truncated file.
+        "options": [],
         # The module resolves a file's role by hashing its content, never from
         # order or a name the host supplies. This entry exists so a UI can ask
         # for the right file and reject an obviously wrong one before spending
@@ -227,8 +212,9 @@ def build_tool(wasm_path: Path) -> dict:
                     {"id": "us", "sha1": ROM_SHA1, "bytes": ROM_BYTES},
                 ],
                 # A Lunar Magic hack cannot match a known hash by construction,
-                # so an unrecognised file is still worth trying.
-                "acceptsModified": True,
+                # so refusing every unrecognised ROM would refuse the point. The
+                # host accepts one and warns; see the spec's spec/05-host.md.
+                "strict": False,
             }
         ],
         "outputs": [
