@@ -65,7 +65,10 @@ BUILD_DIR ?= build/$(PROJECT_KIND)
 PACKED_BIN := Super Mario World.bin
 HB_NAME    := Super Mario World
 COVER_JPG  := $(BUILD_DIR)/cover.jpg
-COVER_SRC  := src/assets/cover_src.jpg
+# Published with the release at full size. The cover packed into the binary is
+# capped at 186x100 and 10 KiB; this is the artwork it was made from.
+COVER_FULL := src/assets/cover_src.png
+COVER_SRC  := src/assets/cover_src.png
 
 include $(GNW_CORE_SDK)/Makefile
 
@@ -117,7 +120,7 @@ all: pack
 # The linker map, named by the same rule that writes it (sdk/Makefile -Wl,-Map).
 TARGET_MAP := $(BUILD_DIR)/$(CORE_NAME)_core.map
 
-.PHONY: print-PROJECT_KIND print-PACKED_BIN print-SIDECARS print-RO_BIN print-CORE_NAME print-DOCKER_IMAGE \
+.PHONY: print-PROJECT_KIND print-PACKED_BIN print-SIDECARS print-RO_BIN print-CORE_NAME print-COVER_FULL print-DOCKER_IMAGE \
 	print-TARGET_ELF print-TARGET_MAP print-CORE_VERSION
 print-PROJECT_KIND:
 	@echo $(PROJECT_KIND)
@@ -131,6 +134,8 @@ print-SIDECARS:
 	@echo $(SIDECARS)
 print-RO_BIN:
 	@echo $(RO_BIN)
+print-COVER_FULL:
+	@echo $(COVER_FULL)
 print-CORE_NAME:
 	@echo $(CORE_NAME)
 print-DOCKER_IMAGE:

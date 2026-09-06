@@ -180,6 +180,13 @@ jobs:
           # the card.
           cp "dist/${TARGET_ELF}" release/
           ELF_NAME="$(basename "${TARGET_ELF}")"
+          # Full-size box art, when this project keeps any. Optional and
+          # tolerated when absent, so the same block works in every project.
+          COVER_ARGS=()
+          COVER_FULL="$(make --no-print-directory print-COVER_FULL 2>/dev/null || true)"
+          if [ -n "${COVER_FULL}" ]; then
+            COVER_ARGS+=(--cover "release/$(basename "${COVER_FULL}")")
+          fi
           python3 scripts/make_manifest.py \
             --bin "release/${PACKED_BIN}" \
             --wasm release/smw_restool.wasm \
@@ -187,6 +194,7 @@ jobs:
             --tag "${GITHUB_REF_NAME}" \
             --repo "${GITHUB_REPOSITORY}" \
             --commit "${GITHUB_SHA}" \
+            "${COVER_ARGS[@]}" \
             --out release/manifest.json
           # Both files the manifest names are installed from the release, so
           # both have to be attached to it.
