@@ -14,6 +14,26 @@ When you cut a release:
 
 ## [Unreleased]
 
+## [v0.4.0] - 2026-09-08
+
+### Changed
+
+- The SDK moves to the new packed-header model: `gwhb_meta_t` now carries
+  `segments_count` and a `segments[]` array instead of one code/bss pair, and
+  the firmware ABI grows to 844 bytes. Taken from upstream.
+- The shared dist scripts are current: the manifest generator reads either
+  header layout, CI reads the sidecar list from the Makefile rather than one
+  hardcoded slot, and `project` is derived as an identifier instead of copying
+  a display name.
+
+### Added
+
+- The full-size cover art is published with the release, beside the smaller
+  one packed into the binary.
+- `originalSystem` records that this came from the SNES, so anything looking
+  up box art searches the right library instead of guessing by name.
+
+
 ## [v0.3.0] - 2026-09-06
 
 ### Added
