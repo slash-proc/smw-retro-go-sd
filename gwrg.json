@@ -14,7 +14,6 @@
       {
         "id": "base",
         "required": true,
-        "repeatable": false,
         "label": {
           "en": "Super Mario World ROM",
           "fr": "ROM de Super Mario World",
@@ -32,7 +31,8 @@
             "bytes": 524288
           }
         ],
-        "strict": false
+        "strict": false,
+        "allowMultiple": false
       }
     ],
     "outputs": [
