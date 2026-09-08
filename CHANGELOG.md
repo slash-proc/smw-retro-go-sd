@@ -14,6 +14,17 @@ When you cut a release:
 
 ## [Unreleased]
 
+## [v0.4.1] - 2026-09-09
+
+### Changed
+
+- `inputs[].repeatable` is now `inputs[].allowMultiple`, following the spec.
+  The field gained a sibling -- `runPerFile`, for a converter that turns a
+  library of files into a library of files -- and the old name did not survive
+  being read next to it. Same meaning, same behaviour; v0.4.0 published the old
+  spelling and no longer matches the schema.
+
+
 ## [v0.4.0] - 2026-09-08
 
 ### Changed
